@@ -13,7 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,11 +30,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.semantics.Role.Companion.Button
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -43,7 +53,7 @@ import kotlinx.coroutines.internal.OpDescriptor
 @Composable
 fun TaskDialog(
     onDismiss:() -> Unit,
-    isEditMode: Boolean = true,
+    isEditMode: Boolean = false,
     onAddToDo:(String,String,Priority) -> Unit,
 
     onUpdateToDo:(String,String,Priority) ->Unit,
@@ -70,17 +80,17 @@ fun TaskDialog(
             var enable by rememberSaveable { if(isEditMode) mutableStateOf(false) else mutableStateOf(true) }
 
             var confirmDeletingToDo by rememberSaveable { mutableStateOf(false) }
-            val focusRequester = remember{
+            var focusRequester = remember{
                 FocusRequester()
             }
             val dialogBackground = when(currentPriority){
-                Priority.LOW-> colorResource(R.color.Green)
+                Priority.LOW-> colorResource(R.color.Green )
                 Priority.MEDIUM -> colorResource(R.color.Yellow)
                 Priority.HIGH -> colorResource(R.color.Red)
             }
 
 
-            val focusMananger = LocalFocusManager.current
+            val focusManager = LocalFocusManager.current
             //add ke time
             //delete ke time
             LaunchedEffect(key1 = enable) {
@@ -89,7 +99,7 @@ fun TaskDialog(
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .background(color = dialogBackground )
+                    .background(color = dialogBackground.copy(alpha = 0.8f))
                     .border(2.dp, colorResource(id = R.color.teal_700), RoundedCornerShape(15.dp))
                     .padding(16.dp)
             ) {
@@ -137,6 +147,73 @@ fun TaskDialog(
 
                     }
                 }
+                Spacer(modifier = Modifier.height(10.dp))
+
+                CustomizedTextField(
+                    modifier = Modifier.focusRequester(focusRequester),
+                    text = currentTitle,
+                    label = "Task Title*",
+                    onValueChange = {currentTitle = it},
+                    enabled = enable,
+                    supportingText = if(isTitleEmpty){
+                        "Please enter title at least"
+                    } else "",
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        }
+                    )
+
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                CustomizedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = currentDescription,
+                    label = "Task Description",
+                    onValueChange = {currentDescription =it},
+                    enabled = enable
+
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ){
+                    Button(
+                        onClick= {onDismiss()},
+                        modifier = Modifier.padding(end = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Magenta.copy(0.6f),
+                            contentColor = Color.White
+                        ),
+                        ){
+                        Text("Cancel", fontWeight = FontWeight.Bold)
+
+                    }
+                    Button(
+                        onClick = {
+                            if(currentTitle.isNotEmpty()){
+                                onAddToDo(
+                                    currentTitle,
+                                    currentDescription,
+                                    currentPriority
+                                )
+                            } else isTitleEmpty = true
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor =  Color.Cyan.copy(0.6f),
+                            contentColor = Color.White
+                        )
+
+                    ){
+                        Text("Add", fontWeight = FontWeight.Bold)
+                    }
+                }
+
             }
 
 

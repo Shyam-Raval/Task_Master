@@ -85,7 +85,7 @@ fun TaskItem(
            }
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = taskUi.dateAdded,
+                text = taskUi.dateAdded!!,
                 fontSize = 10.sp,
 
                 color = Color.White,

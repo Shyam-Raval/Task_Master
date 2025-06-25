@@ -16,8 +16,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,12 +28,12 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.taskmaster.R
+import com.example.taskmaster.core.component.TaskDialog
 import com.example.taskmaster.core.utils.Priority
 import com.example.taskmaster.task.domain.model.TaskUi
 import com.example.taskmaster.task.presentation.components.TaskItem
 import kotlinx.coroutines.launch
 
-@Preview(showBackground = true , showSystemUi = true)
 @Composable
 fun ToDoScreen(
     state : TaskState,
@@ -38,6 +41,7 @@ fun ToDoScreen(
 ) {
 
     val scope = rememberCoroutineScope()
+    val showTaskDialog = rememberSaveable { mutableStateOf(false) }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -45,7 +49,7 @@ fun ToDoScreen(
         contentAlignment = Alignment.Center
 
     ){
-       if(state.isLoading){
+       if(state.isLoading && state.TaskList.isNotEmpty() ){
            CircularProgressIndicator(
 
            )
@@ -59,7 +63,7 @@ fun ToDoScreen(
                verticalArrangement = Arrangement.spacedBy(8.dp)
            ) {
                items(state.TaskList , key= {
-                   it.id //we want ki recomposition km ho ga isse
+                   it.id!! //we want ki recomposition km ho ga isse
                }){
                    TaskItem(taskUi = it)
                }
@@ -67,15 +71,14 @@ fun ToDoScreen(
            }
 
        }
+        else{
+            Text("No Tasks , Add some Tasks!", color = Color.Cyan)
+       }
 
         FloatingActionButton(
             modifier = Modifier.padding(20.dp).align(Alignment.BottomEnd),
             onClick = {
-                scope.launch {
-
-                    //events(TaskEvents.SaveTask())
-
-                }
+                showTaskDialog.value = true
 
             },
             containerColor = colorResource(R.color.purple_200)
@@ -87,6 +90,31 @@ fun ToDoScreen(
                 modifier = Modifier.size(30.dp)
             )
 
+        }
+        if(showTaskDialog.value){
+            TaskDialog(
+                onDismiss = {
+                    showTaskDialog.value = false
+                },
+                onAddToDo = { title,description,priority,->
+                    scope.launch {
+                        val taskui  = TaskUi(
+                            title = title,
+                            description = description,
+                             priority = priority
+
+                        )
+                        events(TaskEvents.SaveTask(taskui))
+
+
+                    }
+                },
+                onDeleteToDo = {},
+                onUpdateToDo = {
+                    _,_,_,->
+                },
+
+            )
         }
     }
 }
