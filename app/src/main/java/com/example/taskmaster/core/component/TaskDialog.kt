@@ -4,6 +4,7 @@ import android.widget.AutoCompleteTextView.OnDismissListener
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,8 +17,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,22 +56,24 @@ import com.example.taskmaster.R
 import com.example.taskmaster.core.utils.Priority
 import com.example.taskmaster.task.presentation.components.TaskItem
 import kotlinx.coroutines.internal.OpDescriptor
+import kotlin.contracts.SimpleEffect
+import kotlin.contracts.contract
 
 @Composable
 fun TaskDialog(
-    onDismiss:() -> Unit,
+    onDismiss: () -> Unit,
     isEditMode: Boolean = false,
-    onAddToDo:(String,String,Priority) -> Unit,
+    onAddToDo: (String, String, Priority) -> Unit,
 
-    onUpdateToDo:(String,String,Priority) ->Unit,
-    onDeleteToDo:()->Unit,
-    existingTitle:String ="",
-    existingDescription:String = "",
+    onUpdateToDo: (String, String, Priority) -> Unit,
+    onDeleteToDo: () -> Unit,
+    existingTitle: String = "",
+    existingDescription: String = "",
     existingPriority: Priority = Priority.LOW
 
 ) {
     Dialog(
-        onDismissRequest = {onDismiss()},
+        onDismissRequest = { onDismiss() },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
@@ -72,19 +81,23 @@ fun TaskDialog(
             modifier = Modifier.padding(16.dp)
         ) {
 
-            var currentTitle by rememberSaveable { mutableStateOf(if(isEditMode) existingTitle else "") }
-            var currentDescription by rememberSaveable { mutableStateOf(if(isEditMode) existingDescription else "") }
-            var currentPriority by rememberSaveable { mutableStateOf(if(isEditMode) existingPriority else Priority.LOW) }
+            var currentTitle by rememberSaveable { mutableStateOf(if (isEditMode) existingTitle else "") }
+            var currentDescription by rememberSaveable { mutableStateOf(if (isEditMode) existingDescription else "") }
+            var currentPriority by rememberSaveable { mutableStateOf(if (isEditMode) existingPriority else Priority.LOW) }
 
             var isTitleEmpty by rememberSaveable { mutableStateOf(false) }
-            var enable by rememberSaveable { if(isEditMode) mutableStateOf(false) else mutableStateOf(true) }
+            var enable by rememberSaveable {
+                if (isEditMode) mutableStateOf(false) else mutableStateOf(
+                    true
+                )
+            }
 
             var confirmDeletingToDo by rememberSaveable { mutableStateOf(false) }
-            var focusRequester = remember{
+            var focusRequester = remember {
                 FocusRequester()
             }
-            val dialogBackground = when(currentPriority){
-                Priority.LOW-> colorResource(R.color.Green )
+            val dialogBackground = when (currentPriority) {
+                Priority.LOW -> colorResource(R.color.Green)
                 Priority.MEDIUM -> colorResource(R.color.Yellow)
                 Priority.HIGH -> colorResource(R.color.Red)
             }
@@ -108,13 +121,62 @@ fun TaskDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
-                    ){
+                ) {
                     Text(
-                        text = if(isEditMode) "Edit/Delete Task" else "Task",
+                        text = if (isEditMode) "Edit/Delete Task" else "Add Task",
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White,
                         fontSize = 18.sp
                     )
+
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (isEditMode) {
+                        Box(
+                            modifier = Modifier.background(
+                                Color.Cyan.copy(alpha = 0.2f),
+                                shape = MaterialTheme.shapes.extraLarge
+                            )
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    enable = true
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "",
+                                    tint = Color.Cyan
+                                )
+
+                            }
+
+                        }
+                        Box(
+                            modifier = Modifier.background(
+                                Color.Red.copy(alpha = 0.2f),
+                                shape = MaterialTheme.shapes.extraLarge
+                            )
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    confirmDeletingToDo = true
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "",
+                                    tint = Color.Red
+                                )
+
+                            }
+
+                        }
+                    }
 
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -124,7 +186,7 @@ fun TaskDialog(
                         .fillMaxWidth()
                         .padding(start = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ){
+                ) {
                     IconWithCircleBackground(
                         selected = currentPriority == Priority.LOW,
                         priority = Priority.LOW
@@ -153,9 +215,9 @@ fun TaskDialog(
                     modifier = Modifier.focusRequester(focusRequester),
                     text = currentTitle,
                     label = "Task Title*",
-                    onValueChange = {currentTitle = it},
+                    onValueChange = { currentTitle = it },
                     enabled = enable,
-                    supportingText = if(isTitleEmpty){
+                    supportingText = if (isTitleEmpty) {
                         "Please enter title at least"
                     } else "",
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -173,7 +235,7 @@ fun TaskDialog(
                     modifier = Modifier.fillMaxWidth(),
                     text = currentDescription,
                     label = "Task Description",
-                    onValueChange = {currentDescription =it},
+                    onValueChange = { currentDescription = it },
                     enabled = enable
 
                 )
@@ -182,34 +244,35 @@ fun TaskDialog(
                 Row(
                     horizontalArrangement = Arrangement.End,
                     modifier = Modifier.fillMaxWidth()
-                ){
+                ) {
                     Button(
-                        onClick= {onDismiss()},
+                        onClick = { onDismiss() },
                         modifier = Modifier.padding(end = 8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Magenta.copy(0.6f),
                             contentColor = Color.White
                         ),
-                        ){
-                        Text("Cancel", fontWeight = FontWeight.Bold)
+                    ) {
+                        Text("Close", fontWeight = FontWeight.Bold)
 
                     }
                     Button(
                         onClick = {
-                            if(currentTitle.isNotEmpty()){
+                            if (currentTitle.isNotEmpty()) {
                                 onAddToDo(
                                     currentTitle,
                                     currentDescription,
                                     currentPriority
                                 )
                             } else isTitleEmpty = true
+
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor =  Color.Cyan.copy(0.6f),
+                            containerColor = Color.Cyan.copy(0.6f),
                             contentColor = Color.White
                         )
 
-                    ){
+                    ) {
                         Text("Add", fontWeight = FontWeight.Bold)
                     }
                 }
@@ -218,6 +281,8 @@ fun TaskDialog(
 
 
         }
+
     }
-    
+
+
 }

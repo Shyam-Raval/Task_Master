@@ -1,5 +1,6 @@
 package com.example.taskmaster.task.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,20 +23,6 @@ import com.example.taskmaster.R
 import com.example.taskmaster.core.utils.Priority
 import com.example.taskmaster.task.domain.model.TaskUi
 
-@Preview(showBackground = true , showSystemUi = true)
-@Composable
-fun TaskItemPreview() {
-    TaskItem(
-        taskUi = TaskUi(
-            id = "1", // Added an ID for consistency with typical data models
-            title = "DSA",
-            description = "Padhle bhai esa time kabhi vapas nhi aayga",
-            priority = Priority.HIGH,
-            dateAdded = "19 JUNE , 11:40 PM , 2025"
-        )
-    )
-}
-
 
 
 // we cant preview as their is no instance
@@ -43,7 +30,8 @@ fun TaskItemPreview() {
 @Composable
 fun TaskItem(
     modifier: Modifier = Modifier,
-    taskUi: TaskUi
+    taskUi: TaskUi,
+    onItemClicked: ()-> Unit
 ) {
     val containerColor = when(taskUi.priority){
         Priority.LOW -> colorResource(R.color.Green)
@@ -53,7 +41,9 @@ fun TaskItem(
 
     }
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable {
+            onItemClicked()
+        },
         colors = CardDefaults.cardColors(containerColor = containerColor)
 
     ){

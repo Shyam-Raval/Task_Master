@@ -18,9 +18,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +44,12 @@ fun ToDoScreen(
 
     val scope = rememberCoroutineScope()
     val showTaskDialog = rememberSaveable { mutableStateOf(false) }
+    var isEditMode by rememberSaveable { mutableStateOf(false ) }
+    var selectedTitle by rememberSaveable { mutableStateOf("") }
+    var selectedDescription by rememberSaveable { mutableStateOf("") }
+    var selectedPriority by rememberSaveable { mutableStateOf(Priority.LOW) }
+    var selectedId by rememberSaveable { mutableStateOf("") }
+
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -49,13 +57,15 @@ fun ToDoScreen(
         contentAlignment = Alignment.Center
 
     ){
-       if(state.isLoading && state.TaskList.isNotEmpty() ){
-           CircularProgressIndicator(
+        if(state.TaskList.isEmpty() && !state.isLoading){
+            Text(text = "Add Tasks, there are no Tasks!" , color = Color.Cyan)
 
-           )
+        }
+       else if(state.isLoading ){
+           CircularProgressIndicator()
        }
 
-       if(state.TaskList.isNotEmpty()){
+       else if(state.TaskList.isNotEmpty()){
 
            LazyColumn(
                modifier = Modifier.fillMaxSize(),
@@ -64,16 +74,21 @@ fun ToDoScreen(
            ) {
                items(state.TaskList , key= {
                    it.id!! //we want ki recomposition km ho ga isse
-               }){
-                   TaskItem(taskUi = it)
+               }){currentTaskUiItem->
+                   TaskItem(taskUi =currentTaskUiItem){
+
+                       selectedId = currentTaskUiItem.id!!
+                       selectedTitle =currentTaskUiItem.title
+                       selectedDescription =currentTaskUiItem.description
+                       selectedPriority = currentTaskUiItem.priority
+                       isEditMode = true
+                   }
                }
 
            }
 
        }
-        else{
-            Text("No Tasks , Add some Tasks!", color = Color.Cyan)
-       }
+
 
         FloatingActionButton(
             modifier = Modifier.padding(20.dp).align(Alignment.BottomEnd),
@@ -93,6 +108,7 @@ fun ToDoScreen(
         }
         if(showTaskDialog.value){
             TaskDialog(
+                isEditMode = isEditMode,
                 onDismiss = {
                     showTaskDialog.value = false
                 },
@@ -108,50 +124,19 @@ fun ToDoScreen(
 
 
                     }
+                    showTaskDialog.value = false
                 },
                 onDeleteToDo = {},
                 onUpdateToDo = {
                     _,_,_,->
                 },
+                existingPriority = selectedPriority,
+                existingTitle =  selectedTitle,
+                existingDescription = selectedDescription,
+
 
             )
         }
     }
 }
 
-val taskList = listOf(
-   TaskUi(
-            id = "1",
-            title = "DSA",
-            description = "Padhle bhai esa time kabhi vapas nhi aayga",
-            priority = Priority.LOW,
-            dateAdded = "19 JUNE, 11:40 PM, 2025"
-        )
-    ,
-
-        TaskUi(
-            id = "2",
-            title = "Android App",
-            description = "Jetpack Compose project banana hai",
-            priority = Priority.MEDIUM,
-            dateAdded = "20 JUNE, 9:00 AM, 2025"
-        )
-    ,
-
-        TaskUi(
-            id = "3",
-            title = "Badminton",
-            description = "Health bhi important hai bhai!",
-            priority = Priority.LOW,
-            dateAdded = "20 JUNE, 6:30 PM, 2025"
-        )
-    ,
-    TaskUi(
-            id = "4",
-            title = "OS Notes",
-            description = "Slides padh le exam aa gaya",
-            priority = Priority.HIGH,
-            dateAdded = "21 JUNE, 10:00 AM, 2025"
-        )
-
-)
