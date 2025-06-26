@@ -256,27 +256,66 @@ fun TaskDialog(
                         Text("Close", fontWeight = FontWeight.Bold)
 
                     }
-                    Button(
-                        onClick = {
-                            if (currentTitle.isNotEmpty()) {
-                                onAddToDo(
-                                    currentTitle,
-                                    currentDescription,
-                                    currentPriority
-                                )
-                            } else isTitleEmpty = true
+                    if (isEditMode) {
+                        Button(
+                            onClick = {
+                                if (currentTitle.isNotEmpty()) {
+                                    onUpdateToDo(
+                                        currentTitle,
+                                        currentDescription,
+                                        currentPriority,
+                                    )
+                                } else {
+                                    isTitleEmpty = true
+                                }
+                            },
+                            enabled = currentTitle != existingTitle || currentDescription != existingDescription || currentPriority != existingPriority,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Green.copy(0.6f),
+                                contentColor = Color.White,
+                                disabledContentColor = Color.LightGray
+                            )
+                        ) {
+                            Text("Update Task", fontWeight = FontWeight.Bold)
 
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Cyan.copy(0.6f),
-                            contentColor = Color.White
-                        )
+                        }
+                    } else {
+                        Button(
+                            onClick = {
+                                if (currentTitle.isNotEmpty()) {
+                                    onAddToDo(
+                                        currentTitle,
+                                        currentDescription,
+                                        currentPriority
+                                    )
+                                } else isTitleEmpty = true
 
-                    ) {
-                        Text("Add", fontWeight = FontWeight.Bold)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Cyan.copy(0.6f),
+                                contentColor = Color.White
+                            )
+
+                        ) {
+                            Text("Add", fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
 
+            }
+
+            if(confirmDeletingToDo){
+                    SimpleAlertDialog(
+                        title = "Deleting Task",
+                        text = "Are you sure you want to delete the Task?",
+                        onConfirm = {
+                            onDeleteToDo()
+                            confirmDeletingToDo = false
+                        },
+                        onDismiss = {
+                            confirmDeletingToDo = false
+                        }
+                    ) { }
             }
 
 

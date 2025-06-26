@@ -82,6 +82,7 @@ fun ToDoScreen(
                        selectedDescription =currentTaskUiItem.description
                        selectedPriority = currentTaskUiItem.priority
                        isEditMode = true
+                       showTaskDialog.value = true
                    }
                }
 
@@ -94,6 +95,7 @@ fun ToDoScreen(
             modifier = Modifier.padding(20.dp).align(Alignment.BottomEnd),
             onClick = {
                 showTaskDialog.value = true
+                isEditMode = false
 
             },
             containerColor = colorResource(R.color.purple_200)
@@ -125,6 +127,7 @@ fun ToDoScreen(
 
                     }
                     showTaskDialog.value = false
+
                 },
                 onDeleteToDo = {},
                 onUpdateToDo = {
