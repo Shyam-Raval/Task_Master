@@ -7,5 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface TaskRepository {
     suspend fun saveTask(taskUi: TaskUi)
     suspend fun getTask(): Flow<List<TaskUi>>
+    suspend fun updateToDo(taskUi: TaskUi)
+    suspend fun deleteTodo(id:String)
 
 }

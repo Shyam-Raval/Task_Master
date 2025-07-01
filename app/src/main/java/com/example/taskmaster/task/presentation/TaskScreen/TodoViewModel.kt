@@ -29,6 +29,12 @@ class TodoViewModel:ViewModel() {
            is TaskEvents.SaveTask->{
                saveTask(events.taskUi)
            }
+           is TaskEvents.DeleteTodo->{
+               deleteTodo(events.id)
+           }
+           is TaskEvents.UpdateTodo -> {
+               updateToDo(events.taskUi)
+           }
        }
     }
    private fun saveTask(taskui: TaskUi){
@@ -57,6 +63,16 @@ class TodoViewModel:ViewModel() {
                 Log.e("Task", "Error in flow collection", e)
             }
 
+        }
+    }
+    private fun updateToDo(taskui: TaskUi){
+        viewModelScope.launch {
+            taskRepository.updateToDo(taskui)
+        }
+    }
+    private fun deleteTodo(id:String){
+        viewModelScope.launch {
+            taskRepository.deleteTodo(id)
         }
     }
 }

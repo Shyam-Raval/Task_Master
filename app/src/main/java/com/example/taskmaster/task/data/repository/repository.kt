@@ -18,8 +18,8 @@ import kotlinx.coroutines.tasks.await
 
 class TaskRepositoryImplementation : TaskRepository {
     //instance of firebase
-    val firebase = FirebaseDatabase.getInstance()
-    val toDoRef = firebase.getReference("ToDoItems")
+    private val firebase = FirebaseDatabase.getInstance()
+    private val toDoRef = firebase.getReference("ToDoItems")
 
 
     override suspend fun saveTask(taskUi: TaskUi) {
@@ -58,6 +58,21 @@ class TaskRepositoryImplementation : TaskRepository {
         awaitClose{
             toDoRef.removeEventListener(Listener)
         }
+    }
+
+    override suspend fun updateToDo(taskUi: TaskUi) {
+        val taskDTO = taskUi.toTaskDTO()
+       try{ toDoRef.child(taskUi.id!!).setValue(taskDTO).await()}
+       catch(e:Exception){
+
+       }
+    }
+
+    override suspend fun deleteTodo(id: String) {
+        try{
+            toDoRef.child(id).removeValue().await()
+        }
+        catch (e:Exception){}
     }
 
 

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -128,57 +129,59 @@ fun TaskDialog(
                         color = Color.White,
                         fontSize = 18.sp
                     )
-
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if (isEditMode) {
-                        Box(
-                            modifier = Modifier.background(
-                                Color.Cyan.copy(alpha = 0.2f),
-                                shape = MaterialTheme.shapes.extraLarge
-                            )
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    enable = true
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "",
-                                    tint = Color.Cyan
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        if (isEditMode) {
+                            Box(
+                                modifier = Modifier.background(
+                                    Color.Cyan.copy(alpha = 0.2f),
+                                    shape = MaterialTheme.shapes.extraLarge
                                 )
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        enable = true
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = "",
+                                        tint = Color.Cyan
+                                    )
+
+                                }
 
                             }
-
-                        }
-                        Box(
-                            modifier = Modifier.background(
-                                Color.Red.copy(alpha = 0.2f),
-                                shape = MaterialTheme.shapes.extraLarge
-                            )
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    confirmDeletingToDo = true
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "",
-                                    tint = Color.Red
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier.background(
+                                    Color.Black.copy(alpha = 0.2f),
+                                    shape = MaterialTheme.shapes.extraLarge
                                 )
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        confirmDeletingToDo = true
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "",
+                                        tint = Color.Black
+                                    )
+
+                                }
 
                             }
-
                         }
+
                     }
 
                 }
+
                 Spacer(modifier = Modifier.height(10.dp))
                 //priority
                 Row(
